@@ -22,3 +22,14 @@
 			FROM dual 
 		)
 	ORDER BY difference DESC');
+
+	
+-- Separates States into quintiles based on their increases in cases
+
+'SELECT State, casesper100k, NTILE(5) OVER(ORDER BY casesper100k DESC) quintile
+	FROM
+	(
+		SELECT  State, ROUND((SUM(sb.cases) - SUM(sa.cases)) * 100000/SUM(Population),0)  casesper100k
+		FROM KARCH.Stats sa, KARCH.Stats sb, KARCH.County
+		WHERE sa.FIPS = KARCH.County.FIPS AND sa.FIPS = sb.FIPS 
+		AND sa.date_ = :startDate AND sb.date_ = :endDate GROUP BY State)');
