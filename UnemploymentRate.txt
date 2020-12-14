@@ -1,0 +1,24 @@
+	
+--Shows where unemployment rate improvements are worse than average 
+
+'SELECT co.Name, co.State, rb.Rates - ra.Rates as difference
+	FROM KARCH.RATES ra, KARCH.RATES rb, KARCH.County co
+	WHERE ra.FIPS = co.FIPS 
+	AND ra.FIPS = rb.FIPS 
+	AND EXTRACT(month from ra.date_) = :startMonth 
+	AND co.State = :state
+	AND EXTRACT(month from rb.date_) = :endMonth 
+	AND (rb.Rates - ra.Rates) >
+		(
+			SELECT 
+				(SELECT AVG(Rates)
+					FROM  KARCH.Rates, KARCH.County
+					WHERE Rates.FIPS = County.FIPS 
+					AND EXTRACT(month from date_) = :endMonth) 
+				- (SELECT AVG(Rates)
+					FROM  KARCH.Rates, KARCH.County
+					WHERE Rates.FIPS = County.FIPS 
+					AND EXTRACT(month from date_) = :startMonth) avg
+			FROM dual 
+		)
+	ORDER BY difference DESC');
