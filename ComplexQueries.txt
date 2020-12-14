@@ -90,3 +90,28 @@
 			WHERE TO_DATE(:startdate,\'DD-MM-YYYY\') - 1 + rownum <= TO_DATE(:enddate,\'DD-MM-YYYY\') 
 		) dater
 	ORDER BY thedate)');
+	
+	
+--shows top 5 counties in the U.S. with greatest increase in unemployment claims
+
+'SELECT County.Name, County.State, ca.date_, cb.date_, ROUND(((cb.Claims - ca.Claims) /  ca.Claims) * 100,2) as increase
+	FROM KARCH.Claims ca, KARCH.Claims cb, KARCH.County
+	WHERE ca.FIPS = cb.FIPS AND ca.date_ = 
+	(	
+		SELECT Claims.date_ 
+		FROM KARCH.Claims
+		ORDER BY ABS(Claims.date_ - TO_DATE(:startDate,\'DD-MM-YYYY\'))
+		FETCH first 1 rows only
+	) 
+	AND cb.date_ = 
+	(
+		SELECT Claims.date_ 
+		FROM KARCH.Claims
+		ORDER BY ABS(Claims.date_ - TO_DATE(:enddate,\'DD-MM-YYYY\'))
+		FETCH first 1 rows only
+	)
+	AND ca.FIPS = County.FIPS 
+	AND ca.Claims > 100 
+	AND cb.Claims > 100
+	ORDER BY increase DESC
+	FETCH first 5 rows only');
