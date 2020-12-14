@@ -1,0 +1,37 @@
+
+
+CREATE TABLE County (
+    FIPS varchar(5),
+    State varchar(15) NOT NULL, 
+    Name varchar(50) NOT NULL,
+    Region INTEGER NOT NULL
+    CONSTRAINT check_region CHECK (Region BETWEEN 1 AND 4),
+    Population INTEGER NOT NULL,
+    PRIMARY KEY (FIPS)
+);
+
+CREATE TABLE Stats (
+    FIPS varchar(5),
+    date_ DATE,
+    Deaths INTEGER,
+    Cases INTEGER, 
+    CHECK (Deaths >= 0), CHECK (Cases >= 0),
+    CONSTRAINT Stats_pk PRIMARY KEY (FIPS, date_)
+);
+
+CREATE TABLE Claims (
+    FIPS varchar(5),
+    date_ DATE, 
+    Claims INTEGER,
+    CHECK (Claims >= 0),
+    CONSTRAINT Claims_pk PRIMARY KEY (FIPS, date_)
+);
+
+CREATE TABLE Rates (
+	FIPS varchar(5),
+	date_ DATE,
+	Rates FLOAT,
+	CHECK (Rates >= 0 AND Rates <= 100),
+	CONSTRAINT Rates_pk PRIMARY KEY (FIPS, date_)
+);
+
