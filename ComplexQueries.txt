@@ -35,7 +35,31 @@
 		AND sa.date_ = :startDate AND sb.date_ = :endDate GROUP BY State)');
 
 
--- Two week rolling average of cases 
+-- two week rolling average of cases
+
+'SELECT thedate, AVG(numcases) OVER (ORDER BY thedate ROWS 13 PRECEDING) avg
+	FROM
+	(
+		SELECT dater.thedate,
+		(
+			SELECT  (sb.cases *100000/c.population- sa.cases *100000/c.population) 
+			FROM KARCH.Stats sa, KARCH.Stats sb, KARCH.County c 
+			WHERE sa.FIPS = sb.FIPS 
+			AND sa.FIPS = :fips 
+			AND c.FIPS = sa.FIPS 
+			AND sa.date_ = dater.thedate - 1 
+			AND sb.date_ = dater.thedate
+		) numcases 
+		FROM
+		(
+			SELECT TO_DATE(:startdate,\'DD-MM-YYYY\') - 1 + rownum as thedate
+			FROM ALL_OBJECTS
+			WHERE TO_DATE(:startdate,\'DD-MM-YYYY\') - 1 + rownum <= TO_DATE(:enddate,\'DD-MM-YYYY\') 
+		) dater
+	ORDER BY thedate)');
+	
+	
+-- Deaths/cases where deaths are delayed by two weeks
 
 'SELECT thedate, (AVG(numdeaths) OVER (ORDER BY thedate ROWS 13 PRECEDING)) / NULLIF(AVG(numcases) OVER (ORDER BY thedate ROWS 13 PRECEDING), 0)  avg
 	FROM
